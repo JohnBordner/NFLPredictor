@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>NFL games</title>
+</head>
+<body>
+
+<table>
+    <thead>
+    <tr>
+        <th>Away Team</th>
+        <th>Home Team</th>
+        <th>Date</th>
+        <th>Time (EST)</th>
+        <th>Status</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- Loop through the games list -->
+    <tr th:each="game : ${games}">
+        <td th:text="${game.away}"></td>
+        <td th:text="${game.home}"></td>
+        <td th:text="${game.gameDate}"></td>
+        <td th:text="${game.gameTime}"></td>
+        <td th:text="${game.gameStatus}"></td>
+
+
+
+        <td th:if="${game.gameStatus == 'Scheduled'}">
+            <form th:action="@{/predict}" method="post">
+                <!-- Hidden input to send the game ID -->
+                <input type="hidden" name="gameId" th:value="${game.gameID}" />
+
+                <!-- Radio buttons to select the winning team -->
+                <label>
+                    <input type="radio" name="winner" th:value="${game.away}" required />
+                    <span th:text="${game.away}"></span>
+                </label>
+                <label>
+                    <input type="radio" name="winner" th:value="${game.home}" required />
+                    <span th:text="${game.home}"></span>
+                </label>
+
+                <!-- Submit button -->
+                <button type="submit">Predict Winner</button>
+            </form>
+        </td>
+
+
+
+
+
+    </tr>
+    </tbody>
+</table>
+<a href="/">Select Another Week</a>
+
+</body>
+</html>
