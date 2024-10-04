@@ -1,5 +1,3 @@
-/*
-
 
 package com.johnbordner.NFLhypoBet.Controller;
 
@@ -16,35 +14,55 @@ import com.johnbordner.NFLhypoBet.service.*;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 
 @Controller
-@RequestMapping("/predictions")
 public class PredictionController {
     @Autowired
     private PredictionService predictionService;
 
     @Autowired
-    private GameService gameService;
+    private RapidApiNflService rapidApiNflService;
 
     @Autowired
     private UserService userService;
 
-    @PostMapping("/submit")
-    public String submitPrediction(@RequestParam Long gameId, @RequestParam boolean covers, Principal principal) {
+    @Autowired
+    private GameService gameService;
+
+    @PostMapping("/index")
+    public String submitPredictions(@RequestParam Map<String, String> allParams, Principal principal) {
         User user = userService.findUserByUsername(principal.getName());
 
-        // Game game = gameService.getGameById(gameId);
+        // Loop through the game predictions submitted
+        for (String key : allParams.keySet()) {
+            if (key.startsWith("predictedWinner")) { // Check if it's a prediction key
+                String predictedWinner = allParams.get(key);
+                String gameID = key.replace("predictedWinner", ""); // Extract gameId from the key
 
-        Prediction prediction = new Prediction();
-        prediction.setUser(user);
-        // prediction.setGame(game);
-        prediction.setPrediction(covers);
+                Game game = gameService.getGameById(gameID);
 
-        predictionService.savePrediction(prediction);
-        return "redirect:/predictions";
+                Prediction existingPrediction = predictionService.getPredictionByUserAndGame(user, game);
+
+                if (existingPrediction != null) {
+                    // Update existing prediction
+                    existingPrediction.setPredictedWinner(predictedWinner);
+                    predictionService.savePrediction(existingPrediction);
+                } else {
+                    // Create a new prediction
+                    Prediction prediction = new Prediction();
+                    prediction.setUser(user);
+                    prediction.setGame(game);
+                    prediction.setPredictedWinner(predictedWinner);
+                    predictionService.savePrediction(prediction);
+                }
+            }
+        }
+
+        return "index"; // Redirect back to the home page
     }
 
-    @GetMapping
+    @GetMapping("/user/account")
     public String showPredictions(Model model, Principal principal) {
         User user = userService.findUserByUsername(principal.getName());
         List<Prediction> predictions = predictionService.getPredictionsForUser(user);
@@ -52,4 +70,4 @@ public class PredictionController {
         return "predictions";
     }
 }
-*/
+

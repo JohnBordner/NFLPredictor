@@ -15,10 +15,12 @@ public class Prediction {
     private Long id;
     @ManyToOne
     private User user;
+
     @ManyToOne
+    @JoinColumn(name = "game_gameid", referencedColumnName = "gameid")
     private Game game;
 
-    private boolean prediction;
+    private String predictedWinner;
     private boolean correct;
 
 

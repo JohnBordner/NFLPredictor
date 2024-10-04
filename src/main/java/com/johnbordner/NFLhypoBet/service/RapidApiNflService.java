@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.johnbordner.NFLhypoBet.model.Game;
+import com.johnbordner.NFLhypoBet.repository.GameRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -19,6 +20,10 @@ public class RapidApiNflService {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private GameRepository gameRepository;
+
 
     private static final String URL = "rapidapi.com";
 
@@ -48,5 +53,19 @@ public class RapidApiNflService {
             return null;  // Return null in case of errors
         }
     }
+
+    public void saveGames(List<Game> games) {
+        for (Game game : games) {
+            // Check if the game already exists in the database
+            if (!gameRepository.existsByGameID(game.getGameID())) {
+                gameRepository.save(game); // Save only if it does not exist
+            }
+        }
+    }
+
+
+
+
+
 
 }

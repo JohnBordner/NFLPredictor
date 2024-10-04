@@ -8,12 +8,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 
-/*
- to be implemented in the future, once we have a database setup
-*/
-
-
-/*
 @Service
 public class GameService {
     @Autowired
@@ -27,11 +21,19 @@ public class GameService {
         return gameRepository.save(game);
     }
 
-    public Game getGameById(Long gameId) {
-        return gameRepository.findById(gameId)
-                .orElseThrow(() -> new RuntimeException("Game not found"));
+    public Game getGameById(String gameID) {
+        return gameRepository.findBygameID(gameID);
     }
+
+    public boolean existsByGameID(String gameID) {
+        return gameRepository.existsByGameID(gameID);
+    }
+
+    public List<Game> getGameByWeekTypeSeason(String week, String type, String season) {
+        return gameRepository.findByGameWeekAndSeasonTypeAndSeason(week, type, season);
+
+    }
+
+
 }
 
-
- */

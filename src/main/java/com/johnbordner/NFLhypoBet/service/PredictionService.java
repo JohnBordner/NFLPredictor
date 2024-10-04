@@ -1,7 +1,5 @@
 package com.johnbordner.NFLhypoBet.service;
 
-
-/*
 import com.johnbordner.NFLhypoBet.model.*;
 import com.johnbordner.NFLhypoBet.repository.PredictionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +21,16 @@ public class PredictionService {
     }
 
     public void evaluatePrediction(Prediction prediction, Game game) {
-        boolean coversSpread = (game.getHomeScore() - game.getAwayScore()) > game.getSpread();
-        prediction.setCorrect(prediction.isPrediction() == coversSpread);
+        // Determine the actual winner of the game
+        String actualWinner = game.getHomeScore() > game.getAwayScore() ? game.getHome() : game.getAway();
+
+        // Compare the predicted winner with the actual winner
+        prediction.setCorrect(prediction.getPredictedWinner().equals(actualWinner)); // Assuming 'getPredictedWinner()' returns the user's predicted winner
         predictionRepository.save(prediction);
     }
+
+    public Prediction getPredictionByUserAndGame(User user, Game game) {
+        return predictionRepository.findByUserAndGame(user, game);
+    }
+
 }
-*/

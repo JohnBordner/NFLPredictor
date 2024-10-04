@@ -2,9 +2,85 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>NFL games</title>
+    <title>NFL Games</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #0073e6; /* Blue header */
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1; /* Highlight on hover */
+        }
+
+        .form-container {
+            display: flex;
+            align-items: center;
+        }
+
+        label {
+            margin-right: 15px;
+        }
+
+        button {
+            background-color: #0073e6; /* Button color */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-left: 10px; /* Space between labels and button */
+        }
+
+        button:hover {
+            background-color: #005bb5; /* Darker shade on hover */
+        }
+
+        .link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: #0073e6;
+            text-decoration: none;
+        }
+
+        .link:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
+
+<h1>NFL Games</h1>
 
 <table>
     <thead>
@@ -14,6 +90,7 @@
         <th>Date</th>
         <th>Time (EST)</th>
         <th>Status</th>
+        <th>Predictions</th>
     </tr>
     </thead>
     <tbody>
@@ -21,40 +98,35 @@
     <tr th:each="game : ${games}">
         <td th:text="${game.away}"></td>
         <td th:text="${game.home}"></td>
-        <td th:text="${game.gameDate}"></td>
+        <td th:text="${game.formattedGameDate}"></td>
         <td th:text="${game.gameTime}"></td>
         <td th:text="${game.gameStatus}"></td>
-
-
-
         <td th:if="${game.gameStatus == 'Scheduled'}">
-            <form th:action="@{/predict}" method="post">
-                <!-- Hidden input to send the game ID -->
-                <input type="hidden" name="gameId" th:value="${game.gameID}" />
+            <div class="form-container">
+                <form th:action="@{/index}" method="post"> <!-- Adjusted action URL -->
+                    <!-- Hidden input to send the game ID -->
+                    <input type="hidden" name="gameId" th:value="${game.gameID}" />
 
-                <!-- Radio buttons to select the winning team -->
-                <label>
-                    <input type="radio" name="winner" th:value="${game.away}" required />
-                    <span th:text="${game.away}"></span>
-                </label>
-                <label>
-                    <input type="radio" name="winner" th:value="${game.home}" required />
-                    <span th:text="${game.home}"></span>
-                </label>
+                    <!-- Radio buttons to select the winning team -->
+                    <label>
+                        <input type="radio" th:attr="name='predictedWinner' + ${game.gameID}" th:value="${game.away}" required />
+                        <span th:text="${game.away}"></span>
+                    </label>
+                    <label>
+                        <input type="radio" th:attr="name='predictedWinner' + ${game.gameID}" th:value="${game.home}" required />
+                        <span th:text="${game.home}"></span>
+                    </label>
 
-                <!-- Submit button -->
-                <button type="submit">Predict Winner</button>
-            </form>
+                    <button type="submit">Predict Winner</button> <!-- Submit button for each game -->
+                </form>
+
+            </div>
         </td>
-
-
-
-
-
     </tr>
     </tbody>
 </table>
-<a href="/">Select Another Week</a>
+
+<a class="link" href="/">Select Another Week</a>
 
 </body>
 </html>
