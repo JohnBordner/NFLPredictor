@@ -30,8 +30,13 @@ public class PredictionController {
     @Autowired
     private GameService gameService;
 
+
     @PostMapping("/index")
-    public String submitPredictions(@RequestParam Map<String, String> allParams, Principal principal) {
+    public String submitPredictions(@RequestParam Map<String, String> allParams,
+                                    @RequestParam("gameWeek") String gameWeek,
+                                    @RequestParam("seasonType") String seasonType,
+                                    @RequestParam("season") String season,
+                                    Principal principal) {
         User user = userService.findUserByUsername(principal.getName());
 
         // Loop through the game predictions submitted
@@ -59,15 +64,35 @@ public class PredictionController {
             }
         }
 
-        return "index"; // Redirect back to the home page
+        return "redirect:/nfl?gameWeek=" + gameWeek + "&seasonType=" + seasonType + "&season=" + season;
     }
 
+
+
+    //unused, similar method in user controller for now, may move it over
     @GetMapping("/user/account")
     public String showPredictions(Model model, Principal principal) {
         User user = userService.findUserByUsername(principal.getName());
         List<Prediction> predictions = predictionService.getPredictionsForUser(user);
+
+        for (Prediction prediction : predictions) {
+            Game game = prediction.getGame();
+
+            if ("Final".equalsIgnoreCase(game.getGameStatus()) ||
+                    "Final/OT".equalsIgnoreCase(game.getGameStatus()) ||
+                    "Completed".equalsIgnoreCase(game.getGameStatus())) {
+
+                // Call the evaluatePrediction method in PredictionService
+                predictionService.evaluatePrediction(prediction, game);
+            }
+
+        }
         model.addAttribute("predictions", predictions);
         return "predictions";
+
     }
+
+
+
 }
 

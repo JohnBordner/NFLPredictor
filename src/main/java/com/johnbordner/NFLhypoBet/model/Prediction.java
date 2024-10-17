@@ -16,11 +16,12 @@ public class Prediction {
     @ManyToOne
     private User user;
 
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name = "game_gameid", referencedColumnName = "gameid")
     private Game game;
 
     private String predictedWinner;
+    private String actualWinner;
     private boolean correct;
 
 

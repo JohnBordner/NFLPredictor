@@ -24,9 +24,15 @@ public class PredictionService {
         // Determine the actual winner of the game
         String actualWinner = game.getHomeScore() > game.getAwayScore() ? game.getHome() : game.getAway();
 
+        prediction.setActualWinner(game.getHomeScore() > game.getAwayScore() ? game.getHome() : game.getAway());
+
+
         // Compare the predicted winner with the actual winner
-        prediction.setCorrect(prediction.getPredictedWinner().equals(actualWinner)); // Assuming 'getPredictedWinner()' returns the user's predicted winner
-        predictionRepository.save(prediction);
+        if (actualWinner != null && !actualWinner.isEmpty()) {
+            // Compare the predicted winner with the actual winner
+            prediction.setCorrect(prediction.getPredictedWinner().equals(actualWinner));
+            predictionRepository.save(prediction);
+        }
     }
 
     public Prediction getPredictionByUserAndGame(User user, Game game) {

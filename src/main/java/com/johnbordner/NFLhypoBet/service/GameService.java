@@ -29,8 +29,19 @@ public class GameService {
         return gameRepository.existsByGameID(gameID);
     }
 
-    public List<Game> getGameByWeekTypeSeason(String week, String type, String season) {
-        return gameRepository.findByGameWeekAndSeasonTypeAndSeason(week, type, season);
+    public List<Game> getGameByWeekTypeSeason(String gameWeek, String seasonType, String season) {
+
+        System.out.println("getGameByWeekTypeSeason method called!");
+
+        System.out.println("Querying database with parameters:");
+        System.out.println("gameWeek: " + gameWeek);
+        System.out.println("seasonType: " + seasonType);
+        System.out.println("season: " + season);
+
+        String formattedWeek = "Week " + gameWeek;
+        String formattedType = seasonType + " Season";
+
+        return gameRepository.findByGameWeekAndSeasonTypeAndSeason(formattedWeek,formattedType, season);
 
     }
 

@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Controller
 public class GameController {
@@ -28,14 +30,6 @@ public class GameController {
     private RapidApiNflService rapidApiNflService;
 
 
-/*
-    @GetMapping
-    public String showGames(Model model) {
-        List<Game> games = gameService.getAllGames();
-        model.addAttribute("games", games);
-        return "games";
-    }
-*/
 
     @GetMapping("/nfl")
     public String getNflGames(@RequestParam("gameWeek")String gameWeek, @RequestParam("seasonType") String seasonType,
@@ -43,8 +37,13 @@ public class GameController {
 
         List <Game> games= gameService.getGameByWeekTypeSeason(gameWeek, seasonType, season);
 
+
+
         if (games == null || games.isEmpty()) {
 
+
+
+            System.out.println("GAMES NOT FOUND");
             games = rapidApiNflService.getNflGames(gameWeek, seasonType, season);
 
             for (Game game : games) {
@@ -58,10 +57,55 @@ public class GameController {
         }
 
 
-        model.addAttribute("games", games);
 
-        return "nfl";  // View to display NFL games
+
+        Set<String> datesCalled = new HashSet<>();  // Store dates for which getScores has been called
+
+        for (Game game : games) {
+            // Check if the game score is 0-0 or the status is not final/completed
+            if ((game.getAwayScore() == 0 && game.getHomeScore() == 0) ||
+                    (!"Final".equals(game.getGameStatus()) &&
+                            !"Final/OT".equals(game.getGameStatus()) &&
+                            !"Completed".equals(game.getGameStatus()))) {
+
+                // Only call getScores if this game date has not been called yet
+                if (!datesCalled.contains(game.getGameDate())) {
+                    datesCalled.add(game.getGameDate());  // Mark date as called
+
+                    // Retrieve scores for the game date
+                    List<Game> updatedGamesWithScores = rapidApiNflService.getScores(game.getGameDate());
+
+                    // Update scores in database
+                    updateGameScores(games, updatedGamesWithScores);
+                }
+            }
+        }
+
+
+        model.addAttribute("games", games);
+        model.addAttribute("gameWeek", gameWeek);
+        model.addAttribute("seasonType", seasonType);
+        model.addAttribute("season", season);
+
+        return "nfl";
     }
+
+
+    private void updateGameScores(List<Game> games, List<Game> updatedGamesWithScores) {
+        for (Game updatedGame : updatedGamesWithScores) {
+            for (Game game : games) {
+                if (game.getGameID().equals(updatedGame.getGameID())) {
+                    game.setAwayScore(updatedGame.getAwayScore());
+                    game.setHomeScore(updatedGame.getHomeScore());
+                    game.setGameStatus(updatedGame.getGameStatus());
+                    gameService.saveGame(game);  // Save the updated game in the database
+                }
+            }
+        }
+    }
+
+
+
     private void saveGamesToDatabase(List<Game> games) {
         for (Game game : games) {
             // Check if the game already exists
